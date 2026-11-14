@@ -1,0 +1,14 @@
+name: ServerHomes
+version: '${project.version}'
+description: ${project.description}
+main: me.pepmon270.serverhomes.ServerHomes
+api-version: '26.3'
+authors: [pepmon270]
+
+permissions:
+  serverhomes.home:
+    description: Allows teleporting to your home with /home.
+    default: true
+  serverhomes.sethome:
+    description: Allows setting your home with /sethome.
+    default: true
