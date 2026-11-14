@@ -10,8 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  # TODO: set to the Modrinth project ID once the project exists.
-  MODRINTH_ID: REPLACE_ME
+  MODRINTH_ID: P7dzUyOJ
   MINECRAFT_VERSION: '26.3'
 
 jobs:
@@ -25,7 +24,7 @@ jobs:
       - name: Check Modrinth publishing is configured
         id: configured
         run: |
-          if [ -n "$MODRINTH_TOKEN" ] && [ "$MODRINTH_ID" != "REPLACE_ME" ]; then
+          if [ -n "$MODRINTH_TOKEN" ]; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
           else
             echo "ready=false" >> "$GITHUB_OUTPUT"
