@@ -1,0 +1,37 @@
+name: Sync Modrinth page
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/modrinth/**
+      - .github/workflows/modrinth-description.yml
+  workflow_dispatch:
+
+env:
+  MODRINTH_ID: P7dzUyOJ
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Update description and summary
+        run: |
+          jq -n \
+            --rawfile body .github/modrinth/description.md \
+            --rawfile summary .github/modrinth/summary.txt \
+            '{body: $body, description: $summary}' > payload.json
+          curl --fail-with-body -sS -X PATCH \
+            -H "Authorization: $MODRINTH_TOKEN" \
+            -H "Content-Type: application/json" \
+            -H "User-Agent: HoneyBerries/ServerHomes (github actions)" \
+            --data @payload.json \
+            "https://api.modrinth.com/v2/project/$MODRINTH_ID"
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}

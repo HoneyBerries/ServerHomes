@@ -1,0 +1,1 @@
+Named homes for Paper: set, list, rename and teleport to as many homes as you allow. Fast SQLite storage, tab completion, simple config.
