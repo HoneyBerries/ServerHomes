@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
  * @param yaw   horizontal rotation
  * @param pitch vertical rotation
  */
-record Home(@NotNull String name, @NotNull String world, double x, double y, double z, float yaw, float pitch) {
+public record Home(@NotNull String name, @NotNull String world, double x, double y, double z, float yaw, float pitch) {
 
     /**
      * Captures a location as a home.
@@ -24,7 +24,7 @@ record Home(@NotNull String name, @NotNull String world, double x, double y, dou
      * @param location location to save; its world must be non-null
      * @return the new home
      */
-    static Home of(String name, Location location) {
+    public static @NotNull Home of(@NotNull String name, @NotNull Location location) {
         return new Home(name, location.getWorld().getName(),
                 location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
     }
@@ -35,7 +35,7 @@ record Home(@NotNull String name, @NotNull String world, double x, double y, dou
      * @param world the loaded world named {@link #world()}
      * @return the location
      */
-    Location toLocation(World world) {
+    public @NotNull Location toLocation(@NotNull World world) {
         return new Location(world, x, y, z, yaw, pitch);
     }
 }

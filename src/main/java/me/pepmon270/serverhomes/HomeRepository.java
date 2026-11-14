@@ -1,5 +1,7 @@
 package me.pepmon270.serverhomes;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -23,19 +25,21 @@ import java.util.concurrent.TimeUnit;
  * operation is atomic with respect to the others (no races on the home limit) and the server
  * thread is never blocked. Every method returns a future that completes on that thread.
  */
-final class HomeRepository implements AutoCloseable {
+public final class HomeRepository implements AutoCloseable {
 
     /** Outcome of {@link #set}. */
-    enum SetResult { CREATED, UPDATED, LIMIT_REACHED }
+    public enum SetResult { CREATED, UPDATED, LIMIT_REACHED }
 
     /** Outcome of {@link #rename}. */
-    enum RenameResult { RENAMED, NOT_FOUND, TARGET_EXISTS }
+    public enum RenameResult { RENAMED, NOT_FOUND, TARGET_EXISTS }
 
+    /** Single daemon thread that owns the database connection and runs every database operation. */
     private final ExecutorService executor = Executors.newSingleThreadExecutor(runnable -> {
         Thread thread = new Thread(runnable, "ServerHomes-DB");
         thread.setDaemon(true);
         return thread;
     });
+    /** The single SQLite connection; only touched from the database thread ({@link #executor}). */
     private final Connection connection;
 
     /**
@@ -44,7 +48,7 @@ final class HomeRepository implements AutoCloseable {
      * @param file path of the SQLite file
      * @throws SQLException if the database cannot be opened
      */
-    HomeRepository(Path file) throws SQLException {
+    public HomeRepository(@NotNull Path file) throws SQLException {
         try {
             this.connection = CompletableFuture.supplyAsync(() -> {
                 try {
@@ -77,7 +81,7 @@ final class HomeRepository implements AutoCloseable {
      * @param owner the player's UUID
      * @return future of their homes, ordered by name
      */
-    CompletableFuture<List<Home>> list(UUID owner) {
+    public @NotNull CompletableFuture<@NotNull List<@NotNull Home>> list(@NotNull UUID owner) {
         return run(() -> {
             try (PreparedStatement s = connection.prepareStatement(
                     "SELECT name, world, x, y, z, yaw, pitch FROM homes WHERE uuid = ? ORDER BY name")) {
@@ -100,7 +104,7 @@ final class HomeRepository implements AutoCloseable {
      * @param name  normalized home name
      * @return future of the home, or empty if there is none with that name
      */
-    CompletableFuture<Optional<Home>> find(UUID owner, String name) {
+    public @NotNull CompletableFuture<@NotNull Optional<@NotNull Home>> find(@NotNull UUID owner, @NotNull String name) {
         return run(() -> {
             try (PreparedStatement s = connection.prepareStatement(
                     "SELECT name, world, x, y, z, yaw, pitch FROM homes WHERE uuid = ? AND name = ?")) {
@@ -122,7 +126,7 @@ final class HomeRepository implements AutoCloseable {
      * @param limit maximum number of homes, or a negative number for unlimited
      * @return future of the outcome
      */
-    CompletableFuture<SetResult> set(UUID owner, Home home, int limit) {
+    public @NotNull CompletableFuture<@NotNull SetResult> set(@NotNull UUID owner, @NotNull Home home, int limit) {
         return run(() -> {
             boolean exists = exists(owner, home.name());
             if (!exists && limit >= 0 && count(owner) >= limit) {
@@ -151,7 +155,7 @@ final class HomeRepository implements AutoCloseable {
      * @param name  normalized home name
      * @return future of {@code true} if a home was deleted, {@code false} if none had that name
      */
-    CompletableFuture<Boolean> delete(UUID owner, String name) {
+    public @NotNull CompletableFuture<@NotNull Boolean> delete(@NotNull UUID owner, @NotNull String name) {
         return run(() -> {
             try (PreparedStatement s = connection.prepareStatement("DELETE FROM homes WHERE uuid = ? AND name = ?")) {
                 s.setString(1, owner.toString());
@@ -169,7 +173,7 @@ final class HomeRepository implements AutoCloseable {
      * @param to    new normalized name
      * @return future of the outcome
      */
-    CompletableFuture<RenameResult> rename(UUID owner, String from, String to) {
+    public @NotNull CompletableFuture<@NotNull RenameResult> rename(@NotNull UUID owner, @NotNull String from, @NotNull String to) {
         return run(() -> {
             if (!exists(owner, from)) {
                 return RenameResult.NOT_FOUND;
@@ -206,7 +210,15 @@ final class HomeRepository implements AutoCloseable {
         }
     }
 
-    private boolean exists(UUID owner, String name) throws SQLException {
+    /**
+     * Checks whether a player already has a home with the given name. Must run on the database thread.
+     *
+     * @param owner the player's UUID
+     * @param name  normalized home name
+     * @return {@code true} if such a home exists
+     * @throws SQLException if the query fails
+     */
+    private boolean exists(@NotNull UUID owner, @NotNull String name) throws SQLException {
         try (PreparedStatement s = connection.prepareStatement("SELECT 1 FROM homes WHERE uuid = ? AND name = ?")) {
             s.setString(1, owner.toString());
             s.setString(2, name);
@@ -216,7 +228,14 @@ final class HomeRepository implements AutoCloseable {
         }
     }
 
-    private int count(UUID owner) throws SQLException {
+    /**
+     * Counts a player's homes. Must run on the database thread.
+     *
+     * @param owner the player's UUID
+     * @return number of homes the player owns
+     * @throws SQLException if the query fails
+     */
+    private int count(@NotNull UUID owner) throws SQLException {
         try (PreparedStatement s = connection.prepareStatement("SELECT COUNT(*) FROM homes WHERE uuid = ?")) {
             s.setString(1, owner.toString());
             try (ResultSet rs = s.executeQuery()) {
@@ -225,19 +244,44 @@ final class HomeRepository implements AutoCloseable {
         }
     }
 
-    private static Home read(ResultSet rs) throws SQLException {
+    /**
+     * Builds a {@link Home} from the current row of a result set.
+     *
+     * @param rs result set positioned on a row with name, world, x, y, z, yaw and pitch columns
+     * @return the home described by the current row
+     * @throws SQLException if a column cannot be read
+     */
+    private static @NotNull Home read(@NotNull ResultSet rs) throws SQLException {
         return new Home(rs.getString("name"), rs.getString("world"),
                 rs.getDouble("x"), rs.getDouble("y"), rs.getDouble("z"),
                 rs.getFloat("yaw"), rs.getFloat("pitch"));
     }
 
-    /** A database task that may throw {@link SQLException}. */
+    /**
+     * A database task that may throw {@link SQLException}.
+     *
+     * @param <T> the result type of the task
+     */
     @FunctionalInterface
     private interface Task<T> {
-        T run() throws SQLException;
+        /**
+         * Performs the database work. Runs on the database thread.
+         *
+         * @return the task's result
+         * @throws SQLException if the database operation fails
+         */
+        public T run() throws SQLException;
     }
 
-    private <T> CompletableFuture<T> run(Task<T> task) {
+    /**
+     * Runs a database task on the dedicated database thread. A {@link SQLException} thrown by the task
+     * is wrapped in an {@link IllegalStateException}, so the returned future completes exceptionally.
+     *
+     * @param task the task to run
+     * @param <T>  the result type of the task
+     * @return future of the task's result
+     */
+    private <T> @NotNull CompletableFuture<T> run(@NotNull Task<T> task) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return task.run();

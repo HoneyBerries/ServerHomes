@@ -6,6 +6,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -17,12 +19,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HomeRepositoryTest {
 
+    @NotNull
     private final UUID alice = UUID.randomUUID();
+    @NotNull
     private final UUID bob = UUID.randomUUID();
+    @Nullable
     private HomeRepository repository;
 
     @BeforeEach
-    void open(@TempDir Path dir) throws Exception {
+    void open(@TempDir @NotNull Path dir) throws Exception {
         repository = new HomeRepository(dir.resolve("homes.db"));
     }
 
@@ -31,7 +36,8 @@ class HomeRepositoryTest {
         repository.close();
     }
 
-    private static Home home(String name) {
+    @NotNull
+    private static Home home(@NotNull String name) {
         return new Home(name, "world", 1.5, 64, -2.5, 90f, 10f);
     }
 
