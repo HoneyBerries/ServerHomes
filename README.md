@@ -1,13 +1,27 @@
 # ServerHomes
 
-Minimal `/sethome` and `/home` plugin for [Paper](https://papermc.io) 26.3.
+Named homes for [Paper](https://papermc.io) 26.3, stored in SQLite.
 
-| Command    | Permission            | Description                          |
-|------------|-----------------------|--------------------------------------|
-| `/sethome` | `serverhomes.sethome` | Save your current location as home.  |
-| `/home`    | `serverhomes.home`    | Teleport to your saved home.         |
+| Command                       | Permission               | Description                          |
+|-------------------------------|--------------------------|--------------------------------------|
+| `/sethome <name>`             | `serverhomes.sethome`    | Save your location as a home.        |
+| `/home <name>`                | `serverhomes.home`       | Teleport to a home.                  |
+| `/delhome <name>`             | `serverhomes.delhome`    | Delete a home.                       |
+| `/renamehome <name> <new>`    | `serverhomes.renamehome` | Rename a home.                       |
+| `/homes`                      | `serverhomes.homes`      | List your homes.                     |
 
-Both permissions default to everyone. Homes are stored in `plugins/ServerHomes/homes.yml`.
+All of the above default to everyone. `serverhomes.unlimited` (default: op) ignores the home limit.
+Home names are 1-32 characters: letters, numbers, `-` and `_` (case-insensitive).
+
+## Configuration
+
+`plugins/ServerHomes/config.yml` is created on first start:
+
+```yaml
+max-homes: 5   # -1 for unlimited
+```
+
+Homes live in `plugins/ServerHomes/homes.db`. The SQLite driver is bundled in the jar.
 
 ## Build
 

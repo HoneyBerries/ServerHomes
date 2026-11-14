@@ -7,8 +7,20 @@ authors: [pepmon270]
 
 permissions:
   serverhomes.home:
-    description: Allows teleporting to your home with /home.
+    description: Teleport to a home with /home.
     default: true
   serverhomes.sethome:
-    description: Allows setting your home with /sethome.
+    description: Set a home with /sethome.
     default: true
+  serverhomes.delhome:
+    description: Delete a home with /delhome.
+    default: true
+  serverhomes.renamehome:
+    description: Rename a home with /renamehome.
+    default: true
+  serverhomes.homes:
+    description: List your homes with /homes.
+    default: true
+  serverhomes.unlimited:
+    description: Ignore the max-homes limit.
+    default: op

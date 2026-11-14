@@ -1,0 +1,3 @@
+# Maximum number of homes each player can have.
+# Use -1 for unlimited. Players with the serverhomes.unlimited permission ignore this limit.
+max-homes: 5
