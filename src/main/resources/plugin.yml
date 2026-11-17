@@ -3,6 +3,7 @@ version: '${project.version}'
 description: ${project.description}
 main: me.pepmon270.serverhomes.ServerHomes
 api-version: '26.3'
+folia-supported: true
 authors: [pepmon270]
 
 permissions:

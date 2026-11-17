@@ -87,6 +87,7 @@ jobs:
           game-versions: ${{ env.MINECRAFT_VERSION }}
           loaders: |
             paper
+            folia
             purpur
 
           changelog: Release ${{ steps.version_info.outputs.version }}

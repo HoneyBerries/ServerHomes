@@ -1,6 +1,6 @@
 # ServerHomes
 
-Named homes for [Paper](https://papermc.io) 26.3, stored in SQLite.
+Named homes for [Paper](https://papermc.io) and [Folia](https://papermc.io/software/folia) 26.3, stored in SQLite.
 
 | Command                       | Permission               | Description                          |
 |-------------------------------|--------------------------|--------------------------------------|

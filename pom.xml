@@ -6,11 +6,11 @@
 
     <groupId>me.pepmon270</groupId>
     <artifactId>serverhomes</artifactId>
-    <version>1.2.1</version>
+    <version>1.2.2</version>
     <packaging>jar</packaging>
 
     <name>ServerHomes</name>
-    <description>Minimal /sethome and /home plugin for Paper.</description>
+    <description>Minimal /sethome and /home plugin for Paper and Folia.</description>
 
     <properties>
         <java.version>25</java.version>

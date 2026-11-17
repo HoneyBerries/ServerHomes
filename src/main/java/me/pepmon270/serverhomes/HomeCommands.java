@@ -89,13 +89,14 @@ public final class HomeCommands {
                 sendErrorMessage(player, "The world of home '" + name + "' is not loaded.");
                 return;
             }
-            player.teleportAsync(home.toLocation(world)).thenAccept(success -> {
+            // Report from the player's own region thread (Folia): the future may complete elsewhere.
+            player.teleportAsync(home.toLocation(world)).thenAccept(success -> player.getScheduler().run(plugin, task -> {
                 if (success) {
                     sendSuccessMessage(player, "Teleported to '" + name + "'.");
                 } else {
                     sendErrorMessage(player, "Teleport was cancelled.");
                 }
-            });
+            }, null));
         });
     }
 
